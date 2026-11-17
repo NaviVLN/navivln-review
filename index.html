@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaviVLN · Task-Centric Hierarchical Vision-Language Navigation</title>
+<meta name="description" content="Project page for NaviVLN, a dual-system VLN policy with task-aligned data grounding, cross-modal latent alignment, and hierarchical training. ICLR 2027 under review.">
+<style>
+  :root{
+    --bg:#f7f6f3;
+    --bg-alt:#fdfcf9;
+    --card:#ffffff;
+    --ink:#2f3336;
+    --ink-soft:#5c6369;
+    --ink-faint:#8a918f;
+    --line:#e4e2dd;
+    --accent:#6f8f88;
+    --accent-deep:#4d6b63;
+    --accent-soft:#e9f0ed;
+    --warm:#c08a6a;
+    --warm-soft:#f6eee8;
+    --shadow:0 8px 30px rgba(47,51,54,.055);
+    --radius:16px;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.68;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:rgba(247,246,243,.9);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:52px}
+  .brand{font-weight:800;letter-spacing:-.02em;font-size:16px;color:var(--ink);text-decoration:none;white-space:nowrap}
+  .brand span{color:var(--accent)}
+  .topnav{display:flex;gap:22px;overflow-x:auto}
+  .topnav a{
+    color:var(--ink-soft);text-decoration:none;font-size:12.5px;
+    letter-spacing:.02em;white-space:nowrap;
+  }
+  .topnav a:hover{color:var(--accent-deep)}
+  .topnav a.ext{color:var(--warm)}
+
+  /* ---------- hero ---------- */
+  .hero{background:var(--bg-alt);border-bottom:1px solid var(--line);padding:30px 0 42px}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:38px;align-items:center}
+  .hero-media{
+    background:#111;border-radius:var(--radius);overflow:hidden;
+    box-shadow:var(--shadow);position:relative;aspect-ratio:16/9;
+  }
+  .hero-media video{width:100%;height:100%;object-fit:cover;display:block}
+  .hero-media .play-hint{
+    position:absolute;left:14px;bottom:12px;color:rgba(255,255,255,.85);
+    font-size:11px;letter-spacing:.08em;background:rgba(0,0,0,.35);
+    padding:4px 10px;border-radius:6px;backdrop-filter:blur(4px);
+  }
+  .tag{
+    display:inline-block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--accent-deep);background:var(--accent-soft);
+    padding:5px 11px;border-radius:999px;margin-bottom:14px;font-weight:700;
+  }
+  h1{font-size:clamp(27px,3.6vw,39px);line-height:1.16;margin:0 0 12px;font-weight:750;letter-spacing:-.02em}
+  .hero-sub{font-size:15px;color:var(--ink-soft);margin:0 0 18px}
+  .hero-authors{font-size:13px;color:var(--ink-soft);margin:0 0 4px}
+  .hero-note{font-size:11.5px;color:var(--ink-faint);margin:0 0 20px}
+  .btnrow{display:flex;flex-wrap:wrap;gap:9px}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:9px;
+    background:var(--accent);color:#fff;text-decoration:none;font-size:13px;font-weight:650;
+    transition:transform .15s ease,filter .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+  .btn.ghost{background:transparent;color:var(--accent-deep);border:1px solid var(--accent)}
+  .btn.warm{background:var(--warm)}
+
+  /* ---------- section scaffolding ---------- */
+  section{padding:52px 0 6px;scroll-margin-top:60px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .sec-num{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.06em}
+  h2{font-size:25px;margin:0;letter-spacing:-.01em;font-weight:720}
+  .sec-cta{font-size:12px;color:var(--ink-faint);margin-left:auto}
+  .lead{color:var(--ink-soft);font-size:14px;margin:8px 0 22px;max-width:880px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+  figure{margin:0}
+  figure img{width:100%;height:auto;display:block;border-radius:10px}
+  figcaption{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.65}
+
+  /* ---------- metric cards ---------- */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+  .metric{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;box-shadow:var(--shadow)}
+  .metric .v{font-size:30px;font-weight:780;color:var(--accent-deep);letter-spacing:-.03em;line-height:1.1}
+  .metric .v.warm{color:var(--warm)}
+  .metric .k{font-size:11.5px;color:var(--ink-soft);margin-top:5px}
+
+  /* ---------- abstract ---------- */
+  .abstract p{font-size:14px;color:var(--ink-soft);margin:0 0 12px}
+  .abstract p:last-child{margin-bottom:0}
+  .abstract strong{color:var(--ink)}
+
+  /* ---------- method ---------- */
+  .oneline{font-size:15px;color:var(--ink);font-weight:600;margin:0 0 18px}
+  .stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:20px}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow)}
+  .stage .no{font-family:var(--mono);font-size:11px;color:var(--warm);font-weight:700;letter-spacing:.08em}
+  .stage h3{font-size:15px;margin:7px 0 8px}
+  .stage p{font-size:12.5px;color:var(--ink-soft);margin:0}
+  .pipeline{
+    margin-top:20px;background:var(--accent-soft);border-radius:11px;padding:14px 18px;
+    font-size:12.5px;color:var(--accent-deep);line-height:1.7;
+  }
+  .pipeline b{font-weight:700}
+
+  /* ---------- table ---------- */
+  .table-wrap{overflow-x:auto;border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+  caption{text-align:left;font-size:12.5px;color:var(--ink-soft);padding:0 0 12px}
+  th,td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:#f2f4f2;font-weight:650}
+  td.l,th.l{text-align:left}
+  tr.ours{background:#eef4f1}
+  tr.ours td{font-weight:700;color:var(--accent-deep)}
+  tr.divider td{border-top:2px solid #cfd6d2}
+  .methods{font-size:11.5px;color:var(--ink-soft);margin:12px 0 0;line-height:1.7}
+
+  /* ---------- videos ---------- */
+  .vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .vcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .vcard video{width:100%;display:block;background:#111;aspect-ratio:16/9;object-fit:cover}
+  .vcard .meta{padding:13px 15px 15px}
+  .vcard h3{font-size:14px;margin:0 0 5px}
+  .vcard p{font-size:12px;color:var(--ink-soft);margin:0}
+  .badge{display:inline-block;font-size:10px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--warm);padding:3px 8px;border-radius:6px;margin-bottom:8px}
+  .badge.sim{background:var(--accent)}
+  .featured{grid-column:1/-1}
+  .note{background:var(--accent-soft);border-left:3px solid var(--accent);padding:13px 16px;border-radius:0 9px 9px 0;font-size:13px;color:var(--accent-deep);margin-top:16px}
+
+  /* ---------- data ---------- */
+  .data-list{margin:0;padding-left:20px}
+  .data-list li{margin-bottom:10px;font-size:13.5px;color:var(--ink-soft)}
+  .data-list strong{color:var(--ink)}
+
+  /* ---------- citation ---------- */
+  .citebox{position:relative;background:#2f3336;color:#e8ecea;border-radius:12px;padding:18px 20px;overflow:auto}
+  .citebox pre{font-family:var(--mono);font-size:12px;line-height:1.7;margin:0;white-space:pre-wrap;word-break:break-word}
+  .copybtn{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer}
+  .copybtn:hover{background:rgba(255,255,255,.2)}
+
+  footer{border-top:1px solid var(--line);margin-top:52px;padding:26px 0 40px;font-size:12.5px;color:var(--ink-soft)}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  footer a{color:var(--accent-deep);text-decoration:none}
+
+  @media(max-width:820px){.hero-grid{grid-template-columns:1fr}.hero-media{order:-1}}
+  @media(max-width:640px){.topnav{gap:14px}.hero{padding:22px 0 30px}section{padding:38px 0 4px}.card{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">Navi<span>VLN</span></a>
+    <nav class="topnav">
+      <a href="#abstract">Abstract</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#qualitative">Videos</a>
+      <a href="#data">Data</a>
+      <a href="#citation">Citation</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-media">
+      <video controls autoplay muted loop playsinline poster="assets/videos/realworld_case16_poster.jpg">
+        <source src="assets/videos/realworld_case16.mp4" type="video/mp4">
+      </video>
+      <span class="play-hint">TEASER · REAL-WORLD EXECUTION</span>
+    </div>
+    <div>
+      <span class="tag">ICLR 2027 · Under Review</span>
+      <h1>NaviVLN: Task-Centric Hierarchical Vision-Language Navigation</h1>
+      <p class="hero-sub">A dual-system policy that aligns vision, language, and trajectories through task-aligned data grounding, cross-modal latent alignment, and staged training.</p>
+      <p class="hero-authors">Anonymous authors</p>
+      <p class="hero-authors">Paper under double-blind review · ICLR 2027 Submission 4022</p>
+      <p class="hero-note">Under review as a conference paper at ICLR 2027</p>
+      <div class="btnrow">
+        <a class="btn" href="#framework">Framework</a>
+        <a class="btn ghost" href="#results">Results</a>
+        <a class="btn ghost" href="#qualitative">Videos</a>
+        <a class="btn warm" href="#data">Dataset</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="abstract">
+  <div class="sec-head"><span class="sec-num">01 / ABSTRACT</span><h2>Abstract</h2></div>
+  <div class="card abstract">
+    <p>Vision-Language Navigation (VLN) integrates spatial perception, instruction understanding, and sequential decision-making. Foundation-model-based policies benefit from multimodal supervision, yet insufficient task relevance and cross-modal correspondence can cause task-agnostic intra-modal redundancy and cross-modal semantic misalignment, limiting sample efficiency and decision consistency.</p>
+    <p>We present <strong>NaviVLN</strong>, a dual-system policy built on <strong>THREAD</strong> (Task-centric Hierarchical Representations via Embodied Alignment for Dual-system), aligning vision, language, and trajectories through data, model, and training. THREAD fuses navigation information into mutually informative visual and textual targets grounding instruction semantics and task progress. Joint Attention integrates implicit visual and textual chain-of-thought during training, shaping shared representations through auxiliary and navigation supervision. Staged training connects these representations to a local trajectory expert; deployment discards auxiliary decoders, using asynchronous intention querying for efficient execution.</p>
+    <p>On R2R-CE and RxR-CE Val-Unseen, NaviVLN with Joint Attention achieves success rates of <strong>68.3%</strong> and <strong>63.7%</strong>. Navi-Dataset contains approximately 4.0M effective trajectory samples, of which 0.8M are alignment-annotated decision anchors. On R2R-CE, NaviVLN is 1.4 percentage points above monocular Qwen-RobotNav-4B using about 25.6% as many samples.</p>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="v">68.3%</div><div class="k">R2R-CE Val-Unseen SR</div></div>
+    <div class="metric"><div class="v">63.7%</div><div class="k">RxR-CE Val-Unseen SR</div></div>
+    <div class="metric"><div class="v warm">4.0M</div><div class="k">Effective trajectory samples</div></div>
+    <div class="metric"><div class="v warm">25.6%</div><div class="k">Samples vs. Qwen-RobotNav-4B</div></div>
+  </div>
+</section>
+
+<section id="framework">
+  <div class="sec-head"><span class="sec-num">02 / FRAMEWORK</span><h2>How it works</h2></div>
+  <p class="oneline">NaviVLN couples task-aligned data grounding with cross-modal latent alignment and a hierarchical trajectory expert.</p>
+  <figure class="card">
+    <img src="assets/figure1.jpg" alt="NaviVLN framework overview">
+    <figcaption><strong>Figure 1.</strong> Overview of NaviVLN: the multi-task dataset, the model with task-aligned representation targets and Joint Attention, and qualitative task-aligned embodied reasoning.</figcaption>
+  </figure>
+  <div class="stages">
+    <div class="stage">
+      <div class="no">01 · DATA GROUNDING</div>
+      <h3>Learn task-aligned targets</h3>
+      <p>Progress-aware descriptions and projected expert paths form mutually informative visual and textual targets, grounding instruction semantics and task progress in the scene.</p>
+    </div>
+    <div class="stage">
+      <div class="no">02 · JOINT ATTENTION</div>
+      <h3>Align the latent streams</h3>
+      <p>Implicit visual and textual chain-of-thought are integrated during training; auxiliary decoders shape shared representations that are discarded at deployment.</p>
+    </div>
+    <div class="stage">
+      <div class="no">03 · TRAJECTORY EXPERT</div>
+      <h3>Execute asynchronously</h3>
+      <p>Staged training connects the representations to a local DiT action expert; slow VLM intention queries and fast closed-loop trajectory updates run asynchronously.</p>
+    </div>
+  </div>
+  <div class="pipeline">
+    <b>Pipeline.</b> Instruction + monocular RGB → task-aligned visual / textual targets → Joint Attention over implicit CoT streams → task-aligned latents → local trajectory expert → executed path.
+  </div>
+</section>
+
+<section id="results">
+  <div class="sec-head"><span class="sec-num">03 / RESULTS</span><h2>Main results</h2></div>
+  <p class="lead">Table 1. Navigation results on R2R-CE and RxR-CE Val-Unseen. NE in meters; OSR / SR / SPL in percent. Counts use each method's own units and are not interchangeable.</p>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <caption>NaviVLN (Joint) is highlighted. Under matched monocular-RGB input it reaches 68.3% SR, +1.4 pp over Qwen-RobotNav-4B at ~25.6% of its samples.</caption>
+        <thead>
+          <tr>
+            <th class="l" rowspan="2">Method</th><th class="l" rowspan="2">Backbone</th><th class="l" rowspan="2">Inputs</th><th class="l" rowspan="2">Train data</th>
+            <th colspan="4">R2R-CE Val-Unseen</th><th colspan="2">RxR-CE Val-Unseen</th>
+          </tr>
+          <tr><th>NE ↓</th><th>OSR ↑</th><th>SR ↑</th><th>SPL ↑</th><th>SR ↑</th><th>SPL ↑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="l">ETPNav</td><td class="l">—</td><td class="l">Pano., Odo., Depth</td><td class="l">—</td><td>4.71</td><td>65.0</td><td>57.0</td><td>49.0</td><td>54.8</td><td>44.9</td></tr>
+          <tr><td class="l">ScaleVLN</td><td class="l">—</td><td class="l">Pano., Odo., Depth</td><td class="l">4.9M</td><td>4.80</td><td>—</td><td>55.0</td><td>51.0</td><td>—</td><td>—</td></tr>
+          <tr class="divider"><td class="l">NaVid</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">1.28M</td><td>5.47</td><td>49.1</td><td>37.4</td><td>35.9</td><td>—</td><td>—</td></tr>
+          <tr><td class="l">Uni-NaVid</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">3.58M</td><td>5.58</td><td>53.3</td><td>47.0</td><td>42.7</td><td>48.7</td><td>40.9</td></tr>
+          <tr><td class="l">NaVILA</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">~13.1M</td><td>5.22</td><td>62.5</td><td>54.0</td><td>49.0</td><td>49.3</td><td>44.0</td></tr>
+          <tr class="divider"><td class="l">NaviVLN (Joint)</td><td class="l">Qwen3-VL-4B</td><td class="l">Mono RGB</td><td class="l">~4.0M</td><td>3.14</td><td>76.18</td><td>68.3</td><td>63.55</td><td>63.7</td><td>55.53</td></tr>
+          <tr class="divider"><td class="l">NavFoM</td><td class="l">—</td><td class="l">Odo.</td><td class="l">12.7M</td><td>4.61</td><td>72.1</td><td>61.7</td><td>55.3</td><td>64.4</td><td>56.2</td></tr>
+          <tr><td class="l">ABot-N0</td><td class="l">—</td><td class="l">Pano.</td><td class="l">16.9M</td><td>3.78</td><td>70.8</td><td>66.4</td><td>63.9</td><td>69.3</td><td>60.0</td></tr>
+          <tr><td class="l">StreamVLN</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">~26.3M</td><td>4.98</td><td>64.2</td><td>56.9</td><td>51.9</td><td>52.9</td><td>46.0</td></tr>
+          <tr><td class="l">InternVLA-N1</td><td class="l">—</td><td class="l">Depth, Mono RGB</td><td class="l">&gt;5M</td><td>4.83</td><td>63.3</td><td>58.2</td><td>54.0</td><td>53.5</td><td>46.1</td></tr>
+          <tr><td class="l">DualVLN</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">~12M</td><td>4.05</td><td>70.7</td><td>64.3</td><td>58.5</td><td>61.4</td><td>51.8</td></tr>
+          <tr><td class="l">Qwen-RobotNav-4B</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">15.6M</td><td>4.22</td><td>73.6</td><td>66.9</td><td>60.5</td><td>71.3</td><td>61.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="methods"><strong>Table 1.</strong> Pano. = panoramic observations; Odo. = odometry. NaviVLN counts are in effective trajectory samples (4.0M total, of which 0.8M are alignment-annotated decision anchors). A dash marks an unavailable or pending entry.</p>
+    <div class="note">The table row for NaviVLN (Joint) is our method. Under the same monocular-RGB input it is <strong>+1.4 pp SR</strong> over Qwen-RobotNav-4B while using about <strong>25.6%</strong> of its training samples.</div>
+  </div>
+</section>
+
+<span id="simulation"></span>
+<section id="qualitative">
+  <div class="sec-head"><span class="sec-num">04 / VIDEOS</span><h2>Qualitative results</h2></div>
+  <p class="lead">Featured real-world execution followed by five-view synchronized simulation episodes. All clips use the same NaviVLN (Joint) configuration.</p>
+  <div class="vgrid">
+    <div class="vcard featured">
+      <video controls preload="metadata" playsinline poster="assets/videos/realworld_case16_poster.jpg">
+        <source src="assets/videos/realworld_case16.mp4" type="video/mp4">
+      </video>
+      <div class="meta">
+        <span class="badge">Real world · featured</span>
+        <h3>Case 16 — Storage room</h3>
+        <p>“Turn left; then go straight for about 50 m, turn left again, and stop in front of the storage room.” Five synchronized views: FPV, semantic prediction, progress / semantic attention, and progress description.</p>
+      </div>
+    </div>
+    <div class="vcard">
+      <video controls preload="metadata" playsinline poster="assets/videos/sim_ep4561_poster.jpg"><source src="assets/videos/sim_ep4561.mp4" type="video/mp4"></video>
+      <div class="meta"><span class="badge sim">Simulation</span><h3>Episode 4561</h3><p>Five-view synchronized rollout.</p></div>
+    </div>
+    <div class="vcard">
+      <video controls preload="metadata" playsinline poster="assets/videos/sim_ep3181_poster.jpg"><source src="assets/videos/sim_ep3181.mp4" type="video/mp4"></video>
+      <div class="meta"><span class="badge sim">Simulation</span><h3>Episode 3181</h3><p>Five-view synchronized rollout.</p></div>
+    </div>
+    <div class="vcard">
+      <video controls preload="metadata" playsinline poster="assets/videos/sim_ep094_poster.jpg"><source src="assets/videos/sim_ep094.mp4" type="video/mp4"></video>
+      <div class="meta"><span class="badge sim">Simulation</span><h3>Episode 094</h3><p>Five-view synchronized rollout.</p></div>
+    </div>
+    <div class="vcard">
+      <video controls preload="metadata" playsinline poster="assets/videos/sim_ep123_poster.jpg"><source src="assets/videos/sim_ep123.mp4" type="video/mp4"></video>
+      <div class="meta"><span class="badge sim">Simulation</span><h3>Episode 123</h3><p>Five-view synchronized rollout.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="data">
+  <div class="sec-head"><span class="sec-num">05 / DATA</span><h2>Data &amp; counting unit</h2></div>
+  <div class="card">
+    <p class="lead" style="margin-top:0">The present data scale reflects two changes — a corrected counting unit and a genuinely larger training set — rather than a mere recount of previous figures.</p>
+    <ul class="data-list">
+      <li><strong>4.0M effective trajectory samples</strong> in total. One trajectory yields one sample under a given camera view, height and instruction description, counted once.</li>
+      <li><strong>0.8M decision anchors</strong> are the alignment-annotated subset <strong>contained within</strong> the same 4.0M samples — not an additional pool. The remaining 3.2M are instruction-following samples without such annotation.</li>
+      <li>Earlier figures were too small because earlier counting did not enumerate all effective samples: different instruction descriptions, camera views / heights, and trajectory utilisation were left out.</li>
+      <li>Repeated exposures from STOP oversampling are counted separately from unique samples, so totals are not double-counted. This accounting is reflected in Figure 2 and Section 3.1 of the paper.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="citation">
+  <div class="sec-head"><span class="sec-num">06 / CITATION</span><h2>Citation</h2></div>
+  <p class="lead">If you find this work useful, please cite it. Author information will be added in the camera-ready version.</p>
+  <div class="citebox">
+    <button class="copybtn" id="copyCite" type="button">Copy</button>
+<pre>@article{navivln2027,
+  title   = {NaviVLN: Task-Centric Hierarchical Vision-Language Navigation},
+  author  = {Anonymous Authors},
+  journal = {Under review as a conference paper at ICLR 2027},
+  year    = {2027}
+}</pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>NaviVLN · Task-centric hierarchical vision-language navigation · ICLR 2027 under review</span>
+    <span><a href="#top">Back to top ↑</a></span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('copyCite').addEventListener('click', function(){
+    var text = document.querySelector('.citebox pre').innerText;
+    navigator.clipboard.writeText(text).then(function(){
+      var b = document.getElementById('copyCite');
+      b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500);
+    });
+  });
+</script>
+
+</body>
+</html>
