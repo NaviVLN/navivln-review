@@ -136,16 +136,26 @@
   }
 
   /* ---------- table ---------- */
-  .table-wrap{overflow-x:auto;border-radius:10px}
-  table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
-  caption{text-align:left;font-size:12.5px;color:var(--ink-soft);padding:0 0 12px}
-  th,td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table-wrap{overflow-x:auto;border-radius:10px;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+  table.wide{min-width:1050px;table-layout:fixed}
+  table.mid{min-width:836px;table-layout:fixed}
+  table.small{min-width:720px;table-layout:fixed}
+  caption{text-align:left;font-size:12px;color:var(--ink-soft);padding:0 0 12px;line-height:1.6}
+  th,td{padding:8px 7px;text-align:center;border-bottom:1px solid var(--line);vertical-align:middle;line-height:1.4}
   th{background:#f2f4f2;font-weight:650}
-  td.l,th.l{text-align:left}
+  th.sub{font-size:11px;color:var(--ink-soft)}
+  td.l,th.l{text-align:left;white-space:normal}
+  td.c,th.c{white-space:nowrap}
   tr.ours{background:#eef4f1}
   tr.ours td{font-weight:700;color:var(--accent-deep)}
   tr.divider td{border-top:2px solid #cfd6d2}
-  .methods{font-size:11.5px;color:var(--ink-soft);margin:12px 0 0;line-height:1.7}
+  .best{font-weight:780;color:var(--accent-deep)}
+  .methods,.tbl-foot{font-size:11.5px;color:var(--ink-soft);margin:11px 0 0;line-height:1.7}
+  .tbl-foot{color:var(--ink-faint)}
+  .subtable{margin-top:24px}
+  .reason{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+  @media(max-width:820px){.reason{grid-template-columns:1fr}}
 
   /* ---------- videos ---------- */
   .vgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -246,8 +256,12 @@
   <div class="sec-head"><span class="sec-num">02 / FRAMEWORK</span><h2>How it works</h2></div>
   <p class="oneline">NaviVLN couples task-aligned data grounding with cross-modal latent alignment and a hierarchical trajectory expert.</p>
   <figure class="card">
-    <img src="assets/figure1.jpg" alt="NaviVLN framework overview">
-    <figcaption><strong>Figure 1.</strong> Overview of NaviVLN: the multi-task dataset, the model with task-aligned representation targets and Joint Attention, and qualitative task-aligned embodied reasoning.</figcaption>
+    <img src="assets/figure1.png" alt="NaviVLN framework: multi-task dataset, model overview, task-aligned embodied reasoning">
+    <figcaption><strong>Figure 1.</strong> Overview of NaviVLN and THREAD. Top left: multi-task data examples. Top right: semantic and progress predictors in the model architecture, coupled through Joint Attention, shape shared representations for trajectory generation. Bottom: task-aligned embodied reasoning relates instruction context, scene evidence, task progress, and intended motion.</figcaption>
+  </figure>
+  <figure class="card" style="margin-top:18px">
+    <img src="assets/figure3.png" alt="NaviVLN architecture and training framework">
+    <figcaption><strong>Figure 3.</strong> NaviVLN architecture and training framework. The VLM forms semantic, progress, and trajectory-related hidden states; visual and textual auxiliary predictors are coupled through Joint Attention with trajectory hidden states as a shared reference. Staged training learns a DiT action expert conditioned on latent intention queries. At deployment, auxiliary decoders are removed and asynchronous querying links slower VLM reasoning with faster local trajectory generation.</figcaption>
   </figure>
   <div class="stages">
     <div class="stage">
@@ -264,6 +278,18 @@
       <div class="no">03 · TRAJECTORY EXPERT</div>
       <h3>Execute asynchronously</h3>
       <p>Staged training connects the representations to a local DiT action expert; slow VLM intention queries and fast closed-loop trajectory updates run asynchronously.</p>
+    </div>
+  </div>
+  <div class="reason">
+    <div class="stage">
+      <div class="no">TSR · TASK-ALIGNED SEMANTIC REASONING</div>
+      <h3>Where can the agent go?</h3>
+      <p>Two-step semantic predictions identify the traversable path region and goal-related scene evidence. Projected expert paths supervise the visual branch, so predicted semantics carry task relevance rather than generic scene structure.</p>
+    </div>
+    <div class="stage">
+      <div class="no">PTR · PROGRESS-AWARE TEXTUAL REASONING</div>
+      <h3>Where is the task now?</h3>
+      <p>Progress descriptions supervise the textual branch with the current stage and next subgoal. Joint Attention couples semantic and progress latents through a stop-gradient navigation reference from the VLM, aligning both branches to the same local decision.</p>
     </div>
   </div>
   <div class="pipeline">
@@ -286,36 +312,93 @@
 
 <section id="results">
   <div class="sec-head"><span class="sec-num">03 / RESULTS</span><h2>Main results</h2></div>
-  <p class="lead">Table 1. Navigation results on R2R-CE and RxR-CE Val-Unseen. NE in meters; OSR / SR / SPL in percent. Counts use each method's own units and are not interchangeable.</p>
+  <p class="lead">Tables below follow the current paper: unseen-scene navigation (Table 1), predictor organization (Table 2), and real-world instruction following (Table 5). NE is in meters; OSR, SR, SPL, and nDTW are on a percentage scale. Training-data counts use each method's own units and are not interchangeable.</p>
+
   <div class="card">
     <div class="table-wrap">
-      <table>
-        <caption>NaviVLN (Joint) is highlighted. Under matched monocular-RGB input it reaches 68.3% SR, +1.4 pp over Qwen-RobotNav-4B at ~25.6% of its samples.</caption>
+      <table class="wide">
+        <caption><strong>Table 1.</strong> Navigation results on R2R-CE and RxR-CE Val-Unseen. Bold marks the best value in each metric column. NaviVLN (Joint) uses monocular RGB and ~4.0M effective trajectory samples.</caption>
+        <colgroup>
+          <col style="width:152px"><col style="width:146px"><col style="width:128px"><col style="width:88px">
+          <col style="width:74px"><col style="width:74px"><col style="width:74px"><col style="width:74px">
+          <col style="width:74px"><col style="width:74px"><col style="width:92px">
+        </colgroup>
         <thead>
           <tr>
             <th class="l" rowspan="2">Method</th><th class="l" rowspan="2">Backbone</th><th class="l" rowspan="2">Inputs</th><th class="l" rowspan="2">Train data</th>
-            <th colspan="4">R2R-CE Val-Unseen</th><th colspan="2">RxR-CE Val-Unseen</th>
+            <th colspan="4">R2R-CE Val-Unseen</th><th colspan="3">RxR-CE Val-Unseen</th>
           </tr>
-          <tr><th>NE ↓</th><th>OSR ↑</th><th>SR ↑</th><th>SPL ↑</th><th>SR ↑</th><th>SPL ↑</th></tr>
+          <tr class="sub"><th>NE ↓</th><th>OSR ↑</th><th>SR ↑</th><th>SPL ↑</th><th>SR ↑</th><th>SPL ↑</th><th>nDTW ↑</th></tr>
         </thead>
         <tbody>
-          <tr><td class="l">ETPNav</td><td class="l">—</td><td class="l">Pano., Odo., Depth</td><td class="l">—</td><td>4.71</td><td>65.0</td><td>57.0</td><td>49.0</td><td>54.8</td><td>44.9</td></tr>
-          <tr><td class="l">ScaleVLN</td><td class="l">—</td><td class="l">Pano., Odo., Depth</td><td class="l">4.9M</td><td>4.80</td><td>—</td><td>55.0</td><td>51.0</td><td>—</td><td>—</td></tr>
-          <tr class="divider"><td class="l">NaVid</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">1.28M</td><td>5.47</td><td>49.1</td><td>37.4</td><td>35.9</td><td>—</td><td>—</td></tr>
-          <tr><td class="l">Uni-NaVid</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">3.58M</td><td>5.58</td><td>53.3</td><td>47.0</td><td>42.7</td><td>48.7</td><td>40.9</td></tr>
-          <tr><td class="l">NaVILA</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">~13.1M</td><td>5.22</td><td>62.5</td><td>54.0</td><td>49.0</td><td>49.3</td><td>44.0</td></tr>
-          <tr class="divider"><td class="l">NaviVLN (Joint)</td><td class="l">Qwen3-VL-4B</td><td class="l">Mono RGB</td><td class="l">~4.0M</td><td>3.14</td><td>76.18</td><td>68.3</td><td>63.55</td><td>63.7</td><td>55.53</td></tr>
-          <tr class="divider"><td class="l">NavFoM</td><td class="l">—</td><td class="l">Odo.</td><td class="l">12.7M</td><td>4.61</td><td>72.1</td><td>61.7</td><td>55.3</td><td>64.4</td><td>56.2</td></tr>
-          <tr><td class="l">ABot-N0</td><td class="l">—</td><td class="l">Pano.</td><td class="l">16.9M</td><td>3.78</td><td>70.8</td><td>66.4</td><td>63.9</td><td>69.3</td><td>60.0</td></tr>
-          <tr><td class="l">StreamVLN</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">~26.3M</td><td>4.98</td><td>64.2</td><td>56.9</td><td>51.9</td><td>52.9</td><td>46.0</td></tr>
-          <tr><td class="l">InternVLA-N1</td><td class="l">—</td><td class="l">Depth, Mono RGB</td><td class="l">&gt;5M</td><td>4.83</td><td>63.3</td><td>58.2</td><td>54.0</td><td>53.5</td><td>46.1</td></tr>
-          <tr><td class="l">DualVLN</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">~12M</td><td>4.05</td><td>70.7</td><td>64.3</td><td>58.5</td><td>61.4</td><td>51.8</td></tr>
-          <tr><td class="l">Qwen-RobotNav-4B</td><td class="l">—</td><td class="l">Mono RGB</td><td class="l">15.6M</td><td>4.22</td><td>73.6</td><td>66.9</td><td>60.5</td><td>71.3</td><td>61.5</td></tr>
+          <tr><td class="l">ETPNav</td><td class="l">Graph Transformer</td><td class="l">Pano., Odo., Depth</td><td class="l">—</td><td>4.71</td><td>65.0</td><td>57.0</td><td>49.0</td><td>54.8</td><td>44.9</td><td>61.9</td></tr>
+          <tr><td class="l">ScaleVLN</td><td class="l">HAMT</td><td class="l">Pano., Odo., Depth</td><td class="l">4.9M</td><td>4.80</td><td>—</td><td>55.0</td><td>51.0</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td class="l">NavFoM</td><td class="l">Qwen2-7B</td><td class="l">Four-view RGB</td><td class="l">12.7M</td><td>4.61</td><td>72.1</td><td>61.7</td><td>55.3</td><td>64.4</td><td>56.2</td><td>65.8</td></tr>
+          <tr><td class="l">ABot-N0</td><td class="l">Qwen3-4B</td><td class="l">Pano.</td><td class="l">16.9M</td><td>3.78</td><td>70.8</td><td>66.4</td><td><span class="best">63.9</span></td><td>69.3</td><td>60.0</td><td>—</td></tr>
+          <tr class="divider"><td class="l">NaVid</td><td class="l">LLaMA-VID-7B</td><td class="l">Mono RGB</td><td class="l">1.28M</td><td>5.47</td><td>49.1</td><td>37.4</td><td>35.9</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td class="l">Uni-NaVid</td><td class="l">Vicuna-7B</td><td class="l">Mono RGB</td><td class="l">3.58M</td><td>5.58</td><td>53.3</td><td>47.0</td><td>42.7</td><td>48.7</td><td>40.9</td><td>—</td></tr>
+          <tr><td class="l">NaVILA</td><td class="l">VILA (Llama 3-8B)</td><td class="l">Mono RGB</td><td class="l">~13.1M</td><td>5.22</td><td>62.5</td><td>54.0</td><td>49.0</td><td>49.3</td><td>44.0</td><td>58.8</td></tr>
+          <tr><td class="l">StreamVLN</td><td class="l">LLaVA-Video-7B</td><td class="l">Mono RGB</td><td class="l">~26.3M</td><td>4.98</td><td>64.2</td><td>56.9</td><td>51.9</td><td>52.9</td><td>46.0</td><td>61.9</td></tr>
+          <tr><td class="l">InternVLA-N1</td><td class="l">Qwen2.5-VL-7B</td><td class="l">Depth, Mono RGB</td><td class="l">&gt;5M</td><td>4.83</td><td>63.3</td><td>58.2</td><td>54.0</td><td>53.5</td><td>46.1</td><td>—</td></tr>
+          <tr><td class="l">DualVLN</td><td class="l">Qwen2.5-VL-7B</td><td class="l">Mono RGB</td><td class="l">~12M</td><td>4.05</td><td>70.7</td><td>64.3</td><td>58.5</td><td>61.4</td><td>51.8</td><td><span class="best">70.0</span></td></tr>
+          <tr><td class="l">FutureNav-4B</td><td class="l">Qwen3-VL-4B</td><td class="l">Mono RGB</td><td class="l">10.46M*</td><td>4.24</td><td>70.2</td><td>65.4</td><td>61.3</td><td>60.9</td><td>52.8</td><td>68.0</td></tr>
+          <tr><td class="l">Qwen-RobotNav-4B</td><td class="l">Qwen3-VL-4B</td><td class="l">Mono RGB</td><td class="l">15.6M</td><td>4.22</td><td>73.6</td><td>66.9</td><td>60.5</td><td><span class="best">71.3</span></td><td><span class="best">61.5</span></td><td>68.6</td></tr>
+          <tr class="ours divider"><td class="l">NaviVLN (Joint)</td><td class="l">Qwen3-VL-4B</td><td class="l">Mono RGB</td><td class="l">~4.0M</td><td><span class="best">3.14</span></td><td><span class="best">76.18</span></td><td><span class="best">68.3</span></td><td>63.55</td><td>63.7</td><td>55.53</td><td>65.23</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="methods"><strong>Table 1.</strong> Pano. = panoramic observations; Odo. = odometry. NaviVLN counts are in effective trajectory samples (4.0M total, of which 0.8M are alignment-annotated decision anchors). A dash marks an unavailable or pending entry.</p>
-    <div class="note">The table row for NaviVLN (Joint) is our method. Under the same monocular-RGB input it is <strong>+1.4 pp SR</strong> over Qwen-RobotNav-4B while using about <strong>25.6%</strong> of its training samples.</div>
+    <p class="tbl-foot"><strong>Table 1 notes.</strong> Pano. = panoramic observations; Odo. = odometry. *FutureNav reports 10.457M external samples plus approximately 2.43M benchmark training samples. A dash marks an entry not reported by the respective method. For NaviVLN, the 0.8M alignment-annotated decision anchors are contained within the same 4.0M effective trajectory samples.</p>
+    <div class="note">Under matched monocular-RGB input, NaviVLN (Joint) reaches <strong>68.3% SR</strong> on R2R-CE, <strong>+1.4 pp</strong> over Qwen-RobotNav-4B while using about <strong>25.6%</strong> of its training samples.</div>
+  </div>
+
+  <div class="card subtable">
+    <div class="table-wrap">
+      <table class="mid">
+        <caption><strong>Table 2.</strong> Predictor organization and cross-branch coupling on R2R-CE and RxR-CE Val-Unseen. NE is in meters; OSR, SR, SPL, and nDTW are on a percentage scale. The full model is listed last.</caption>
+        <colgroup>
+          <col style="width:284px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:90px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="l" rowspan="2">Configuration</th>
+            <th colspan="4">R2R-CE Val-Unseen</th><th colspan="3">RxR-CE Val-Unseen</th>
+          </tr>
+          <tr class="sub"><th>NE ↓</th><th>OSR ↑</th><th>SR ↑</th><th>SPL ↑</th><th>SR ↑</th><th>SPL ↑</th><th>nDTW ↑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="l">Separate</td><td>3.27</td><td>74.62</td><td>64.2</td><td>58.92</td><td>61.2</td><td>53.47</td><td>62.46</td></tr>
+          <tr><td class="l">Merged</td><td>3.42</td><td>73.85</td><td>62.5</td><td>57.90</td><td>59.4</td><td>52.22</td><td>61.78</td></tr>
+          <tr><td class="l">Joint w/o cross-branch K/V</td><td>3.52</td><td>72.17</td><td>63.2</td><td>58.81</td><td>61.6</td><td>53.25</td><td>64.26</td></tr>
+          <tr><td class="l">Joint w/o navigation reference</td><td>3.71</td><td>71.76</td><td>61.8</td><td>57.65</td><td>58.2</td><td>50.42</td><td>60.35</td></tr>
+          <tr><td class="l">Joint w/ cross-branch gradients</td><td>3.21</td><td>75.32</td><td>67.5</td><td>62.87</td><td>62.7</td><td>54.51</td><td>64.17</td></tr>
+          <tr><td class="l">Joint + alignment loss</td><td>3.44</td><td>73.22</td><td>66.3</td><td>61.62</td><td>63.4</td><td>54.95</td><td>64.86</td></tr>
+          <tr class="ours divider"><td class="l"><strong>Joint (full model)</strong></td><td><span class="best">3.14</span></td><td><span class="best">76.18</span></td><td><span class="best">68.3</span></td><td><span class="best">63.55</span></td><td><span class="best">63.7</span></td><td><span class="best">55.53</span></td><td><span class="best">65.23</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-foot">Removing cross-branch K/V excludes the other branch's latent states from attention; the variant without the navigation reference removes the shared trajectory reference from both branches. The alignment-loss variant adds an explicit cross-branch objective but does not improve on the full model.</p>
+  </div>
+
+  <div class="card subtable" id="realworld">
+    <div class="table-wrap">
+      <table class="small">
+        <caption><strong>Table 5.</strong> Real-world instruction following across five cases. Each configuration is evaluated over 75 trials (15 per case); total successes and success rates are reported.</caption>
+        <colgroup>
+          <col style="width:150px"><col style="width:234px"><col style="width:112px"><col style="width:124px"><col style="width:100px">
+        </colgroup>
+        <thead>
+          <tr><th class="l">Configuration</th><th class="l">Visual supervision</th><th>Total trials</th><th>Total successes</th><th>SR (%) ↑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="l">RGB<sub>0.8M</sub></td><td class="l">Future RGB</td><td>75</td><td>26</td><td>34.7</td></tr>
+          <tr><td class="l">RGB<sub>16M</sub></td><td class="l">Future RGB</td><td>75</td><td>38</td><td>50.7</td></tr>
+          <tr><td class="l">Sem-Merged</td><td class="l">Task-aligned semantics</td><td>75</td><td>40</td><td>53.3</td></tr>
+          <tr><td class="l">Sem-Separate</td><td class="l">Task-aligned semantics</td><td>75</td><td>46</td><td>61.3</td></tr>
+          <tr class="ours divider"><td class="l">Sem-Joint</td><td class="l">Task-aligned semantics</td><td>75</td><td><span class="best">52</span></td><td><span class="best">69.3</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-foot">A trial succeeds when the robot completes the instruction, including any requested stop or door crossing. Sem-Joint reaches 69.3% success, outperforming the strongest monocular-RGB baseline by 18.6 percentage points.</p>
   </div>
 </section>
 
