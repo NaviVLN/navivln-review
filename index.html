@@ -292,22 +292,6 @@
       <p>Progress descriptions supervise the textual branch with the current stage and next subgoal. Joint Attention couples semantic and progress latents through a stop-gradient navigation reference from the VLM, aligning both branches to the same local decision.</p>
     </div>
   </div>
-  <div class="pipeline">
-    <p class="pipeline-label">Pipeline</p>
-    <div class="flow">
-      <div class="flow-node io"><span class="step">INPUT</span><span class="txt">Instruction +<br>monocular RGB</span></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node"><span class="step">GROUNDING</span><span class="txt">Task-aligned visual /<br>textual targets</span></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node"><span class="step">ALIGNMENT</span><span class="txt">Joint Attention over<br>implicit CoT streams</span></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node"><span class="step">REPRESENTATION</span><span class="txt">Task-aligned<br>latents</span></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node"><span class="step">EXECUTION</span><span class="txt">Local trajectory<br>expert</span></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node io"><span class="step">OUTPUT</span><span class="txt">Executed<br>path</span></div>
-    </div>
-  </div>
 </section>
 
 <section id="results">
