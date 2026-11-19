@@ -296,7 +296,7 @@
 
 <section id="results">
   <div class="sec-head"><span class="sec-num">03 / RESULTS</span><h2>Main results</h2></div>
-  <p class="lead">Tables below follow the current paper: unseen-scene navigation (Table 1), predictor organization (Table 2), and real-world instruction following (Table 5). NE is in meters; OSR, SR, SPL, and nDTW are on a percentage scale. Training-data counts use each method's own units and are not interchangeable.</p>
+  <p class="lead">Tables below follow the current paper: unseen-scene navigation (Table 1), predictor organization (Table 2), training-stage and DiT variants (Table 4), and real-world instruction following (Table 5). NE is in meters; OSR, SR, SPL, and nDTW are on a percentage scale. Training-data counts use each method's own units and are not interchangeable.</p>
 
   <div class="card">
     <div class="table-wrap">
@@ -361,6 +361,33 @@
       </table>
     </div>
     <p class="tbl-foot">Removing cross-branch K/V excludes the other branch's latent states from attention; the variant without the navigation reference removes the shared trajectory reference from both branches. The alignment-loss variant adds an explicit cross-branch objective but does not improve on the full model.</p>
+  </div>
+
+  <div class="card subtable">
+    <div class="table-wrap">
+      <table class="small">
+        <caption><strong>Table 4.</strong> Training-stage and DiT action-expert variants on Val-Unseen navigation. SR and SPL are percentages. Rows are ordered by R2R-CE SR with the full Joint model last.</caption>
+        <colgroup>
+          <col style="width:250px"><col style="width:140px"><col style="width:88px"><col style="width:88px"><col style="width:88px"><col style="width:88px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="l" rowspan="2">Configuration</th><th class="l" rowspan="2">Training stages</th>
+            <th colspan="2">R2R-CE Val-Unseen</th><th colspan="2">RxR-CE Val-Unseen</th>
+          </tr>
+          <tr class="sub"><th>SR ↑</th><th>SPL ↑</th><th>SR ↑</th><th>SPL ↑</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="l">Stage 0 + DiT</td><td class="l">0 → 3</td><td>56.9</td><td>49.6</td><td>52.7</td><td>39.8</td></tr>
+          <tr><td class="l">Skip Stage 2</td><td class="l">0 → 1</td><td>57.9</td><td>51.21</td><td>54.6</td><td>41.63</td></tr>
+          <tr><td class="l">Stage 0 + explicit CoT</td><td class="l">0</td><td>60.3</td><td>54.88</td><td>56.1</td><td>44.60</td></tr>
+          <tr><td class="l">Skip Stage 1</td><td class="l">0 → 2</td><td>62.7</td><td>55.43</td><td>58.6</td><td>47.75</td></tr>
+          <tr><td class="l">Joint + DiT</td><td class="l">0 → 1 → 2 → 3</td><td>67.1</td><td>61.82</td><td>61.8</td><td>54.17</td></tr>
+          <tr class="ours divider"><td class="l"><strong>Full Joint</strong></td><td class="l">0 → 1 → 2</td><td><span class="best">68.3</span></td><td><span class="best">63.55</span></td><td><span class="best">63.7</span></td><td><span class="best">55.53</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-foot">With explicit CoT, the model generates reasoning text before the navigation answer. The DiT action expert is introduced at Stage 3; adding it to Stage 0 or to the full Joint representation does not improve on the corresponding non-DiT configuration, and the full Joint schedule remains the strongest.</p>
   </div>
 
   <div class="card subtable" id="realworld">
