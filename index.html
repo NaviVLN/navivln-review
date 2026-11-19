@@ -260,6 +260,10 @@
     <figcaption><strong>Figure 1.</strong> Overview of NaviVLN and THREAD. Top left: multi-task data examples. Top right: semantic and progress predictors in the model architecture, coupled through Joint Attention, shape shared representations for trajectory generation. Bottom: task-aligned embodied reasoning relates instruction context, scene evidence, task progress, and intended motion.</figcaption>
   </figure>
   <figure class="card" style="margin-top:18px">
+    <img src="assets/figure2.png" alt="Navi-Dataset composition and task-aligned annotation pipeline">
+    <figcaption><strong>Figure 2.</strong> Navi-Dataset and its task-aligned annotation pipeline. The top panels show sample composition and scene diversity; the dataset contains approximately 4.0M effective trajectory samples, of which 0.8M are decision anchors with both visual and textual CoT annotations (20\% of all samples), a subset of the same pool. The bottom panels show how trajectories are segmented into subtasks and how progress-aware descriptions guide semantic targets that retain relevant landmarks and the projected expert path.</figcaption>
+  </figure>
+  <figure class="card" style="margin-top:18px">
     <img src="assets/figure3.png" alt="NaviVLN architecture and training framework">
     <figcaption><strong>Figure 3.</strong> NaviVLN architecture and training framework. The VLM forms semantic, progress, and trajectory-related hidden states; visual and textual auxiliary predictors are coupled through Joint Attention with trajectory hidden states as a shared reference. Staged training learns a DiT action expert conditioned on latent intention queries. At deployment, auxiliary decoders are removed and asynchronous querying links slower VLM reasoning with faster local trajectory generation.</figcaption>
   </figure>
