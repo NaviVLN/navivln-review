@@ -93,6 +93,20 @@
   figure{margin:0}
   figure img{width:100%;height:auto;display:block;border-radius:10px}
   figcaption{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.65}
+  /* ---------- figure reading guide ---------- */
+  .figlead{display:flex;align-items:flex-start;gap:12px;margin:30px 0 12px;padding:0 2px}
+  .figlead .fl-num{
+    flex:0 0 auto;font-family:var(--mono);font-size:10.5px;font-weight:750;letter-spacing:.06em;
+    color:var(--warm);background:var(--warm-soft);padding:6px 10px;border-radius:7px;margin-top:2px;white-space:nowrap
+  }
+  .figlead .fl-txt{font-size:14px;color:var(--ink);font-weight:650;line-height:1.5}
+  .figlead .fl-txt small{display:block;font-weight:400;color:var(--ink-soft);font-size:12.5px;margin-top:3px;line-height:1.6}
+  @media(max-width:640px){.figlead{flex-direction:column;gap:7px}}
+  .fig-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .fig-title .ft-num{font-family:var(--mono);font-size:10.5px;font-weight:750;letter-spacing:.08em;color:#fff;background:var(--accent);padding:4px 8px;border-radius:6px;white-space:nowrap}
+  .fig-title .ft-main{font-size:16px;font-weight:720;color:var(--ink);letter-spacing:-.01em}
+  .fig-title .ft-sub{font-size:12px;color:var(--ink-faint);margin-left:auto}
+  @media(max-width:640px){.fig-title .ft-sub{margin-left:0;width:100%}}
 
   /* ---------- metric cards ---------- */
   .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
@@ -255,17 +269,17 @@
 <section id="framework">
   <div class="sec-head"><span class="sec-num">02 / FRAMEWORK</span><h2>How it works</h2></div>
   <p class="oneline">NaviVLN couples task-aligned data grounding with cross-modal latent alignment and a hierarchical trajectory expert.</p>
+  <!-- 01 : framework overview -->
+  <div class="figlead">
+    <span class="fl-num">01 · OVERVIEW</span>
+    <div class="fl-txt">Start with the big picture: how NaviVLN aligns vision, language, and trajectories in one dual-system policy
+      <small>Figure 1 is the global view, from task-aligned data through shared representations to trajectory generation. The three cards below break out its key ingredients.</small>
+    </div>
+  </div>
   <figure class="card">
+    <div class="fig-title"><span class="ft-num">FIG 1</span><span class="ft-main">System overview</span><span class="ft-sub">data → shared representations → trajectories</span></div>
     <img src="assets/figure1.png" alt="NaviVLN framework: multi-task dataset, model overview, task-aligned embodied reasoning">
     <figcaption><strong>Figure 1.</strong> Overview of NaviVLN and THREAD. Top left: multi-task data examples. Top right: semantic and progress predictors in the model architecture, coupled through Joint Attention, shape shared representations for trajectory generation. Bottom: task-aligned embodied reasoning relates instruction context, scene evidence, task progress, and intended motion.</figcaption>
-  </figure>
-  <figure class="card" style="margin-top:18px">
-    <img src="assets/figure2.png" alt="Navi-Dataset composition and task-aligned annotation pipeline">
-    <figcaption><strong>Figure 2.</strong> Navi-Dataset and its task-aligned annotation pipeline. The top panels show sample composition and scene diversity; the dataset contains approximately 4.0M effective trajectory samples, of which 0.8M are decision anchors with both visual and textual CoT annotations (20\% of all samples), a subset of the same pool. The bottom panels show how trajectories are segmented into subtasks and how progress-aware descriptions guide semantic targets that retain relevant landmarks and the projected expert path.</figcaption>
-  </figure>
-  <figure class="card" style="margin-top:18px">
-    <img src="assets/figure3.png" alt="NaviVLN architecture and training framework">
-    <figcaption><strong>Figure 3.</strong> NaviVLN architecture and training framework. The VLM forms semantic, progress, and trajectory-related hidden states; visual and textual auxiliary predictors are coupled through Joint Attention with trajectory hidden states as a shared reference. Staged training learns a DiT action expert conditioned on latent intention queries. At deployment, auxiliary decoders are removed and asynchronous querying links slower VLM reasoning with faster local trajectory generation.</figcaption>
   </figure>
   <div class="stages">
     <div class="stage">
@@ -284,6 +298,19 @@
       <p>Staged training connects the representations to a local DiT action expert; slow VLM intention queries and fast closed-loop trajectory updates run asynchronously.</p>
     </div>
   </div>
+
+  <!-- 02 : dataset -->
+  <div class="figlead">
+    <span class="fl-num">02 · DATA</span>
+    <div class="fl-txt">Then the data: where task-aligned supervision comes from
+      <small>Figure 2 shows the composition of Navi-Dataset and its annotation pipeline. The two cards that follow explain how the semantic and progress branches write task relevance into the supervision targets.</small>
+    </div>
+  </div>
+  <figure class="card">
+    <div class="fig-title"><span class="ft-num">FIG 2</span><span class="ft-main">Navi-Dataset &amp; task-aligned annotation</span><span class="ft-sub">4.0M effective samples · 0.8M decision anchors</span></div>
+    <img src="assets/figure2.png" alt="Navi-Dataset composition and task-aligned annotation pipeline">
+    <figcaption><strong>Figure 2.</strong> Navi-Dataset and its task-aligned annotation pipeline. The top panels show sample composition and scene diversity; the dataset contains approximately 4.0M effective trajectory samples, of which 0.8M are decision anchors with both visual and textual CoT annotations (20\% of all samples), a subset of the same pool. The bottom panels show how trajectories are segmented into subtasks and how progress-aware descriptions guide semantic targets that retain relevant landmarks and the projected expert path.</figcaption>
+  </figure>
   <div class="reason">
     <div class="stage">
       <div class="no">TSR · TASK-ALIGNED SEMANTIC REASONING</div>
@@ -296,6 +323,19 @@
       <p>Progress descriptions supervise the textual branch with the current stage and next subgoal. Joint Attention couples semantic and progress latents through a stop-gradient navigation reference from the VLM, aligning both branches to the same local decision.</p>
     </div>
   </div>
+
+  <!-- 03 : architecture -->
+  <div class="figlead">
+    <span class="fl-num">03 · MODEL</span>
+    <div class="fl-txt">Finally, the implementation: architecture and staged training
+      <small>Figure 3 shows the model and training flow: auxiliary predictors shape shared representations via Joint Attention during training, then are removed at deployment, leaving only the asynchronously queried trajectory expert.</small>
+    </div>
+  </div>
+  <figure class="card">
+    <div class="fig-title"><span class="ft-num">FIG 3</span><span class="ft-main">Architecture &amp; staged training</span><span class="ft-sub">joint attention → DiT expert → async deployment</span></div>
+    <img src="assets/figure3.png" alt="NaviVLN architecture and training framework">
+    <figcaption><strong>Figure 3.</strong> NaviVLN architecture and training framework. The VLM forms semantic, progress, and trajectory-related hidden states; visual and textual auxiliary predictors are coupled through Joint Attention with trajectory hidden states as a shared reference. Staged training learns a DiT action expert conditioned on latent intention queries. At deployment, auxiliary decoders are removed and asynchronous querying links slower VLM reasoning with faster local trajectory generation.</figcaption>
+  </figure>
 </section>
 
 <section id="results">
